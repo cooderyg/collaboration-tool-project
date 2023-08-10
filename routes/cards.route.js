@@ -1,9 +1,9 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/auth-middleware');
-const { Cards } = require('../models');
+const { Columns, Cards, Users, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const { sequelize } = require('../models');
 const router = express.Router();
+
 // 칼럼 내 카드 조회
 router.get('/:columnId/card', async (req, res) => {
   try {
@@ -13,18 +13,38 @@ router.get('/:columnId/card', async (req, res) => {
       where: { columnId },
       order: [['order', 'ASC']],
     });
-    console.log('columnId = ', columnId)
-    res.status(200).json({datas: cards});
+    if (!cards.length) {
+      return res.status(401).json({ message: '해당 칼럼에 카드가 없습니다.' });
+    }
+
+    res.status(200).json({ datas: cards });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 조회 중 오류가 발생했습니다.' });
   }
 });
+
+// 카드 상세조회
+router.get('/cards/:cardId', async (req, res) => {
+  const cardId = Number(req.params.cardId);
+  try {
+    const card = await Cards.findOne({
+      where: { cardId },
+      include: [{ model: Users }],
+    });
+    res.status(200).json({ data: card });
+  } catch (error) {
+    res.status(500).json({ message: error.message || '서버에서 예기치 못한 에러가 발생했습니다.' });
+  }
+});
+
 // 카드 생성
 router.post('/card', authMiddleware, async (req, res) => {
   try {
     const { columnId, name, content, color, endDate } = req.body;
+    console.log(columnId, name, content, color, endDate)
     const userId = res.locals.user.userId;
+
     // 사용자가 입력한 endDate 값을 new Date()를 사용하여 JavaScript의 Date 객체로 변환, endDate를 입력하지 않으면 null
     const parsedEndDate = endDate ? new Date(endDate) : null;
     // 현재 날짜와 시간을 나타내는 Date 객체를 생성
@@ -39,7 +59,9 @@ router.post('/card', authMiddleware, async (req, res) => {
         parsedEndDate.setFullYear(currentDate.getFullYear() + 1);
       }
     }
+
     const maxOrder = await Cards.max('order', { where: { columnId } });
+
     const newCard = await Cards.create({
       columnId,
       userId,
@@ -49,60 +71,78 @@ router.post('/card', authMiddleware, async (req, res) => {
       endDate: parsedEndDate,
       order: maxOrder !== null ? maxOrder + 1 : 1,
     });
-    res.status(201).json(newCard);
+
+    res.status(201).json({ message: "새로운 카드가 생성되었습니다."});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 생성 중 오류가 발생했습니다.' });
   }
 });
+
 // 카드 내용 수정
 router.put('/card/:cardId', authMiddleware, async (req, res) => {
   try {
     const cardId = req.params.cardId;
     const { name, content, color, endDate } = req.body;
     const userId = res.locals.user.userId;
+
     const parsedEndDate = endDate ? new Date(endDate) : null;
     const currentDate = new Date();
+
     if (parsedEndDate) {
       parsedEndDate.setFullYear(currentDate.getFullYear());
+
       if (parsedEndDate < currentDate) {
         parsedEndDate.setFullYear(currentDate.getFullYear() + 1);
       }
     }
+
     const [updatedRowCount] = await Cards.update(
       { name, content, color, userId, endDate: parsedEndDate },
       { where: { cardId } },
     );
+
     if (updatedRowCount === 0) {
       return res.status(404).json({ error: '해당 카드를 찾을 수 없습니다.' });
     }
+
     const updatedCard = await Cards.findByPk(cardId);
-    res.status(200).json(updatedCard);
+
+    res.status(200).json({ data: updatedCard, ok: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 수정 중 오류가 발생했습니다.' });
   }
 });
+
 // 카드 삭제
 router.delete('/card/:cardId', authMiddleware, async (req, res) => {
   try {
     const cardId = req.params.cardId;
     const deletedRowCount = await Cards.destroy({ where: { cardId } });
+
     if (deletedRowCount === 0) {
       return res.status(404).json({ error: '해당 카드를 찾을 수 없습니다.' });
     }
-    res.status(204).json();
+
+    return res.status(204).json({ message: '카드삭제를 완료했습니다.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 삭제 중 오류가 발생했습니다.' });
   }
 });
+
 // 카드 위치 수정
 router.put('/card/move/:cardId', authMiddleware, async (req, res) => {
   try {
     const cardId = req.params.cardId;
     const { columnId, newOrder } = req.body;
     const card = await Cards.findOne({ where: { cardId } });
+    
+    const isColumn = await Columns.findOne({ where: {columnId: columnId} })
+    console.log('columnId = ', columnId)
+    if(!isColumn) return res.status(401).json({message: "존재하지 않는 컬럼입니다."})
+
     if (card.columnId !== columnId) {
       // 다른 칼럼으로 이동할 경우
       await sequelize.transaction(async (transaction) => {
@@ -176,4 +216,5 @@ router.put('/card/move/:cardId', authMiddleware, async (req, res) => {
     res.status(500).json({ error: '카드 이동 중 오류가 발생했습니다.' });
   }
 });
+
 module.exports = router;

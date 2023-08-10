@@ -62,8 +62,9 @@ const columnView = async () => {
                           <div>
                             <div class="column-title">
                               <h2>${el.name}</h2>
-                              <span>${el.order}</span>번
                             </div>
+                            <span>${el.order}</span>번
+                            <span>ID: ${el.columnId}</span>
                             <input id="new-name" type="text">
                             <button id="edit-name-btn" onclick="editName()" class="edit-name">이름수정</button>
                             <input id="new-order" type="text">
@@ -102,13 +103,26 @@ const cardView = async () => {
   columns.forEach(async (el) => {
     // 컬럼의 태드정보에 있는 컬럼id값을 보낸다.
     const cards = await getCards(el.id);
-    console.log('cards = ', cards)
+    console.log('el = ', el.id)
     // 해당 컬럼에 카드들이 있으면
     if (cards.datas) {
       cards.datas.forEach((el2) => {
         const card = document.createElement('div');
-        card.innerHTML = `<div id="${el2.cardId}" onclick="location.href='/cards/${el2.cardId}'" class="card" style="background-color:${el2.color}">
-                            <h3>${el2.name}</h3>
+        card.innerHTML = `<div  class="card" style="background-color:${el2.color}">
+                            <div class="head-box">
+                              <h3 class="card-title" onclick="location.href='/cards/${el2.cardId}'">${el2.name}</h3>
+                              <div id="card-menu" onclick="showMenu(${el2.cardId})" class="card-menu">카드메뉴</div>
+                              <div id="menu-${el2.cardId}" class="menu">
+                                <div class="input-box">
+                                  <span>이동할 컬럼id: </span><input id="${el2.cardId}-column-id"/> 
+                                </div>
+                                <div class="input-box">
+                                  <span>새로운 순번: </span><input id="${el2.cardId}-new-order"/>
+                                </div>
+                                  <button id="card-order" onclick="cardOrder(${el2.cardId}, ${el.id})">변경하기</button>
+                                  <button onclick="closeMenu(${el2.cardId})">닫기</button>
+                                </div> 
+                            </div>
                             <div>${el2.content}</div>
                           </div>`;
         el.append(card);
@@ -123,12 +137,64 @@ const cardView = async () => {
   });
 };
 
+// 카드 순서변경
+async function cardOrder(paramCardId, paramColumnId, $event) {
+  const cardId = paramCardId
+  const columnId = paramColumnId
+  const newColumnId = document.getElementById(`${cardId}-column-id`).value
+  const newOrder = document.getElementById(`${cardId}-new-order`).value
+  if(newOrder === "" || typeof Number(newOrder) === NaN) return alert("값이 잘못되었습니다.")
+  if(!newColumnId) {
+    await fetch(`/api/card/move/${cardId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        columnId: columnId,
+        newOrder: newOrder
+      }),
+    })
+    .then((response) => response.json())
+    .then((result) => {
+      alert(result.message);
+    });
+    
+  } else {
+    await fetch(`/api/card/move/${cardId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        columnId: newColumnId,
+        newOrder: newOrder
+      }),
+    })
+    .then((response) => response.json())
+    .then((result) => {
+      alert(result.message);
+    });
+  }
+  
+  location.reload();
+}
+function showMenu(param) {
+  document.getElementById(`menu-${param}`).style.display = "block"  
+}
+
+function closeMenu(param) {
+  document.getElementById(`menu-${param}`).style.display = "none"
+}
+
+
+
 // 컬럼 이름 변경
 async function editName($event) {
   const parentElement = event.target.parentElement;
   const newName = parentElement.childNodes[3].value;
   const columnId = event.target.parentElement.parentElement.id;
-
+  
   await fetch(`/api/${boardId}/column/${columnId}`, {
     method: 'PUT',
     headers: {
@@ -138,10 +204,10 @@ async function editName($event) {
       name: newName,
     }),
   })
-    .then((response) => response.json())
-    .then((result) => {
-      alert(result.message);
-    });
+  .then((response) => response.json())
+  .then((result) => {
+    alert(result.message);
+  });
   location.reload();
 }
 
@@ -150,7 +216,7 @@ async function editOrder($event) {
   const parentElement = event.target.parentElement;
   const newOrder = parentElement.childNodes[7].value;
   const columnId = event.target.parentElement.parentElement.id;
-
+  
   await fetch(`/api/${boardId}/column_order/${columnId}`, {
     method: 'PUT',
     headers: {
@@ -160,11 +226,11 @@ async function editOrder($event) {
       order: newOrder,
     }),
   })
-    .then((response) => response.json())
-    .then((result) => {
-      console.log('result = ', result);
-      alert(result.message);
-    });
+  .then((response) => response.json())
+  .then((result) => {
+    console.log('result = ', result);
+    alert(result.message);
+  });
   location.reload();
 }
 
@@ -174,10 +240,10 @@ async function removeColumn($event) {
   await fetch(`/api/${boardId}/column/${columnId}`, {
     method: 'DELETE',
   })
-    .then((response) => response.json())
-    .then((result) => {
-      alert(result.message);
-    });
+  .then((response) => response.json())
+  .then((result) => {
+    alert(result.message);
+  });
   location.reload();
 }
 
@@ -205,7 +271,7 @@ formCard.addEventListener('submit', async (e) => {
   e.preventDefault();
   const payload = new FormData(formCard);
   console.log([...payload], columnId);
-
+  
   await fetch(`/api/card`, {
     method: 'POST',
     body: JSON.stringify({
@@ -219,10 +285,10 @@ formCard.addEventListener('submit', async (e) => {
       'Content-Type': 'application/json',
     },
   })
-    .then((response) => response.json())
-    .then((result) => {
-      alert(result.message);
-    });
+  .then((response) => response.json())
+  .then((result) => {
+    alert(result.message);
+  });
   location.reload();
 });
 
@@ -230,3 +296,4 @@ formCard.addEventListener('submit', async (e) => {
 async function closeModal() {
   modal.style.display = 'none';
 }
+
