@@ -1,5 +1,5 @@
 const express = require('express');
-const { Comments } = require('../models');
+const { Comments, Users } = require('../models');
 const router = express.Router();
 const auth = require('../middlewares/auth-middleware');
 
@@ -55,19 +55,21 @@ router.get('/comments/:card_id', async (req, res) => {
   const cardId = req.params.card_id;
 
   try {
-    const comments = await Comments.findAll({ where: { cardId } });
-
-    if (comments.length === 0) {
-      return res.status(404).json({ message: '해당 카드에 댓글이 없습니다.' });
-    }
+    const comments = await Comments.findAll({ where: { cardId }, include: [{ model: Users }] });
+    // console.log(comments);
+    // console.log(comments[0].User);
+    // if (comments.length === 0) {
+    //   return res.status(404).json({ message: '해당 카드에 댓글이 없습니다.' });
+    // }
 
     const commentList = comments.map((comment) => ({
       commentId: comment.commentId,
       comment: comment.comment,
-      userId: comment.userId,
+      userName: comment.User.name,
+      createdAt: comment.createdAt,
     }));
 
-    res.status(200).json({ comments: commentList });
+    res.status(200).json({ data: commentList });
   } catch (error) {
     console.error('Error fetching comments:', error);
     res.status(500).json({ message: '서버 오류로 댓글을 불러올 수 없습니다.' });
