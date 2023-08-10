@@ -18,5 +18,40 @@
       </div>
       <section id="column-list" class="column-list"></section>
     </div class="container">
+    <div id="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">제목</h4>
+          </div>
+          <div class="modal-body">
+            <form action="" class="input-column" id="form-card">
+              <div>
+                <span>카드이름 : </span><input name="cardname" type="text" id="card-name">
+              </div>
+              <div>
+                <span>카드내용 : </span><input name="cardcontent" type="text" id="card-content">
+              </div>
+              <div>
+                <span>색상 : </span> 
+                <select name="color" id="lang">
+                  <option style="background: #ffffff" value="WHITE">White</option>
+                  <option style="background: #ff2600" value="RED">Red</option>
+                  <option style="background: green" value="GREEN">green</option>
+
+                </select>
+              </div>
+              <div>
+                <span>종료일 : </span><input name="enddate" type="date" id="card-end-date">
+              </div>
+              <input type="submit" class="btn btn-primary" id="">
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="close-modal">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
