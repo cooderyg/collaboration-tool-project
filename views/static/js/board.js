@@ -4,9 +4,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // path의 보드ID를 가져오기
 const boardId = window.location.pathname.split('/')[2];
-// window.onload = async function () {
-//   await columnView();
-// };
 
 // 새 컬럼추가 버튼
 const addBtn = document.getElementById('add-btn');
@@ -72,6 +69,7 @@ const columnView = async () => {
                             <input id="new-order" type="text">
                             <button id="edit-order-btn" onclick="editOrder()" class="edit-order">순서수정</button>
                             <button onclick="removeColumn()">삭제하기</button>
+                            <button onclick="openModal()">카드추가</button>
                           </div>
                         </div>`;
     columnList.append(column);
@@ -182,4 +180,52 @@ async function removeColumn($event) {
   location.reload();
 }
 
-// 카드를 눌렀을 때 카드 상세페이지로 이동하기
+const closeBtn = document.getElementById('close-modal');
+const modal = document.getElementById('modal');
+
+// 날짜 셀렉트박스의 기본값으로 현재 날짜 넣기
+document.getElementById('card-end-date').value = new Date().toISOString().substring(0, 10);
+
+// 모달창 열기
+closeBtn.addEventListener('click', closeModal);
+
+let columnId;
+// 모달창 열기
+async function openModal() {
+  columnId = event.target.parentElement.parentElement.id;
+  console.log(' columnId = ', columnId);
+  modal.style.display = 'block';
+}
+const formCard = document.getElementById('form-card');
+
+// card생성 api에 form데이터 전송
+// 새로운 카드 생성
+formCard.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = new FormData(formCard);
+  console.log([...payload], columnId);
+
+  await fetch(`/api/card`, {
+    method: 'POST',
+    body: JSON.stringify({
+      columnId: columnId,
+      name: [...payload][0][1],
+      content: [...payload][1][1],
+      color: [...payload][2][1],
+      endDate: [...payload][3][1],
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      alert(result.message);
+    });
+  location.reload();
+});
+
+// 모달창 닫기
+async function closeModal() {
+  modal.style.display = 'none';
+}
