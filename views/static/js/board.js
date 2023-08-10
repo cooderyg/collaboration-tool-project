@@ -92,7 +92,7 @@ const getCards = async (columnId) => {
       console.log(err);
     });
 
-  return datas;
+  return datas
 };
 
 // 카드데이터 뿌려주기
@@ -102,11 +102,12 @@ const cardView = async () => {
   columns.forEach(async (el) => {
     // 컬럼의 태드정보에 있는 컬럼id값을 보낸다.
     const cards = await getCards(el.id);
+    console.log('cards = ', cards)
     // 해당 컬럼에 카드들이 있으면
     if (cards.datas) {
       cards.datas.forEach((el2) => {
         const card = document.createElement('div');
-        card.innerHTML = `<div id="${el2.cardId}" class="card" style="background-color:${el2.color}">
+        card.innerHTML = `<div id="${el2.cardId}" onclick="location.href='/cards/${el2.cardId}'" class="card" style="background-color:${el2.color}">
         ${el2.name}
         <div>${el2.content}</div>
         </div>`;

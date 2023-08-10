@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/:columnId/card', async (req, res) => {
   try {
     const columnId = req.params.columnId;
+    console.log('columnId = ', columnId)
     // order 값을 기준으로 오름차순
     const cards = await Cards.findAll({
       where: { columnId },
