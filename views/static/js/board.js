@@ -108,9 +108,9 @@ const cardView = async () => {
       cards.datas.forEach((el2) => {
         const card = document.createElement('div');
         card.innerHTML = `<div id="${el2.cardId}" onclick="location.href='/cards/${el2.cardId}'" class="card" style="background-color:${el2.color}">
-        ${el2.name}
-        <div>${el2.content}</div>
-        </div>`;
+                            <h3>${el2.name}</h3>
+                            <div>${el2.content}</div>
+                          </div>`;
         el.append(card);
       });
     }
