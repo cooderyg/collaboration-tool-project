@@ -56,7 +56,7 @@ const getCommentData = async () => {
   // 서버에서 댓글 목록을 가져와서 화면에 표시하는 함수
   const response = await fetch(`/api/comments/${cardId}`); // 댓글을 가져오는 API 엔드포인트
   const { data } = await response.json();
-  console.log(data);
+  // console.log(data);
   if (data.length === 0) return;
   // data 배열을 순회하며 댓글 정보를 화면에 표시하는 HTML 생성
   const temp = data.map((comment) => {
@@ -89,7 +89,29 @@ commentEl.addEventListener('click', async function (e) {
 
   if (e.target.classList.contains('edit-comment-btn')) {
     // 댓글 수정 버튼 클릭 시의 동작 처리
-    // 수정할 수 있는 입력 폼을 표시하고 수정을 수행하는 로직 작성
+    const commentId = e.target.parentNode.getAttribute('data-id');
+    const commentContentEl = e.target.parentNode.querySelector('.comment-comment');
+
+    const originalContent = commentContentEl.textContent;
+    const updatedContent = prompt('댓글을 수정하세요:', originalContent);
+
+    if (updatedContent !== null) {
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: updatedContent }),
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.message === '수정이 정상적으로 완료되었습니다.') {
+        commentContentEl.textContent = updatedContent;
+        window.location.reload();
+      } else {
+        alert(data.message);
+      }
+    }
   }
 
   if (e.target.classList.contains('delete-comment-btn')) {
@@ -105,7 +127,7 @@ commentEl.addEventListener('click', async function (e) {
     });
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
 
     if (data.message === '댓글이 정상적으로 삭제되었습니다.') {
       window.location.reload();
@@ -127,7 +149,7 @@ commentCreateBtn.addEventListener('click', async () => {
     body: JSON.stringify({ comment: commentInputEl.value }),
   });
   const data = await response.json();
-  console.log(data);
+  // console.log(data);
   if (data.message === '댓글이 작성되었습니다.') {
     window.location.reload();
   } else {
