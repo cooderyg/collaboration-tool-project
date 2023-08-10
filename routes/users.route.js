@@ -128,5 +128,19 @@ router.post('/user_search', async (req, res) => {
     res.status(500).json({ message: 'server error.' });
   }
 });
+router.get('/userInfo', middleware, async (req, res) => {
+  const { userId } = res.locals.user;
+  try {
+    const user = await Users.findOne({ where: { userId } });
+    if (!user) {
+      return res.status(400).json({
+        message: '해당 유저가 존재하지 않습니다.',
+      });
+    }
+    return res.status(200).json({ user });
+  } catch {
+    res.status(500).json({ message: 'server error.' });
+  }
+});
 // 회원가입 끝
 module.exports = router;

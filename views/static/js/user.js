@@ -4,6 +4,24 @@ const userConfirmPasswordEl = document.querySelector('.user-confirm-password');
 const userNameEl = document.querySelector('.user-name');
 const userBtnEl = document.querySelector('.user-btn');
 const userDeleteBtnEl = document.querySelector('.user-delete-btn');
+window.onload = function () {
+  userInfoCall();
+};
+async function userInfoCall() {
+  const response = await fetch('/api/userInfo', {
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      const email = data['user'].email;
+      const name = data['user'].name;
+      userEmailEl.value = email;
+      userNameEl.value = name;
+    });
+}
 userBtnEl.addEventListener('click', async () => {
   if (userEmailEl.value === '' || userPasswordEl.value === '' || userNameEl.value === '')
     return alert('수정 정보를 입력해주세요');
