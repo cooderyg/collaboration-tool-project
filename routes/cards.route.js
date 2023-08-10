@@ -31,6 +31,7 @@ router.get('/:columnId/card', async (req, res) => {
 router.post('/card', authMiddleware, async (req, res) => {
   try {
     const { columnId, name, content, color, endDate } = req.body;
+    console.log(columnId, name, content, color, endDate)
     const userId = res.locals.user.userId;
 
     // 사용자가 입력한 endDate 값을 new Date()를 사용하여 JavaScript의 Date 객체로 변환, endDate를 입력하지 않으면 null
@@ -60,7 +61,7 @@ router.post('/card', authMiddleware, async (req, res) => {
       order: maxOrder !== null ? maxOrder + 1 : 1,
     });
 
-    res.status(201).json(newCard);
+    res.status(201).json({ message: "새로운 카드가 생성되었습니다."});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 생성 중 오류가 발생했습니다.' });
