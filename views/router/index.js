@@ -48,4 +48,8 @@ router.get('/boards-edit/:boardId', (req, res) => {
 router.get('/user', (req, res) => {
   return res.render('user');
 });
+
+router.get('/cards-edit/:cardId', (req, res) => {
+  return res.render('card-edit');
+});
 module.exports = router;

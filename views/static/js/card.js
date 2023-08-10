@@ -1,78 +1,51 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const addCardButton = document.querySelector('#add-card-button');
-  addCardButton.addEventListener('click', function (event) {
-    addCard(event);
-  });
+const cardId = window.location.pathname.split('/')[2];
+const cardEl = document.querySelector('.card');
+const cardName = document.querySelector('.card-name');
+const cardContent = document.querySelector('.card-content');
+const endDate = document.querySelector('.end-date');
+const cardUser = document.querySelector('.card-user');
+const editBtnEl = document.querySelector('.edit-btn');
+const deleteBtnEl = document.querySelector('.delete-btn');
 
-  const editButtons = document.querySelectorAll('.btn-edit-card');
-  editButtons.forEach((button) => {
-    button.addEventListener('click', function (event) {
-      editCard(event);
-    });
-  });
+const getData = async () => {
+  const response = await fetch(`/api/cards/${cardId}`);
+  const { data } = await response.json();
+  console.log(data);
+  const userName = data.User.name;
+  const { color, name, content, endDate: endDateData } = data;
+  if (color === 'WHITE') {
+    cardEl.style.backgroundColor = '#F5F5DC';
+  } else if (color === 'RED') {
+    cardEl.style.backgroundColor = '#DC143C';
+  } else {
+    cardEl.style.backgroundColor = '#32CD32';
+  }
+  console.log(endDateData);
+  cardName.innerText = name;
+  cardContent.innerText = content;
+  endDate.innerText = endDateData;
+  cardUser.innerText = `작성자 : ${userName}`;
+};
+getData();
 
-  const deleteButtons = document.querySelectorAll('.btn-delete-card');
-  deleteButtons.forEach((button) => {
-    button.addEventListener('click', function (event) {
-      deleteCard(event);
-    });
-  });
+editBtnEl.addEventListener('click', () => {
+  window.location.href = `/cards-edit/${cardId}`;
+});
+deleteBtnEl.addEventListener('click', async () => {
+  if (!confirm('정말로 삭제하시겠습니까?')) return;
 
-  const moveButtons = document.querySelectorAll('.btn-move-card');
-  moveButtons.forEach((button) => {
-    button.addEventListener('click', function (event) {
-      moveCard(event);
-    });
+  const response = await fetch(`/api/card/${cardId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
+  console.log(response);
+  if (response.ok) {
+    window.history.back();
+  }
 });
 
-function getCards() {}
-
-function addCard(event) {
-  const button = event.target;
-  const columnId = button.getAttribute('columnId');
-  const cardName = prompt('카드 제목을 입력하세요:');
-
-  if (cardName) {
-    $.ajax({
-      type: 'POST',
-      url: `/api/card`,
-      data: { columnId, name: cardName },
-      success: (data) => {
-        console.log(data);
-        alert('카드가 추가되었습니다.');
-      },
-      error: (error) => {
-        alert(error.responseJSON.error);
-      },
-    });
-  }
-}
-
-function deleteCard(event) {
-  const button = event.target;
-  const cardId = button.getAttribute('deleteCardId');
-
-  $.ajax({
-    type: 'DELETE',
-    url: `/api/card/${cardId}`,
-    success: (data) => {
-      console.log(data);
-      alert(data.message);
-      getCards();
-    },
-    error: (error) => {
-      alert(error.responseJSON.error);
-    },
-  });
-}
-
-function editCard(event) {
-  const button = event.target;
-  const cardId = button.getAttribute('editCardId');
-}
-
-function moveCard(event) {
-  const button = event.target;
-  const cardId = button.getAttribute('moveCardId');
-}
+// #DC143C 빨강
+// #32CD32 녹색
+// #F5F5DC 흰색

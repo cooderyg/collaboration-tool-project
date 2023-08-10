@@ -1,10 +1,9 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/auth-middleware');
-const { Cards } = require('../models');
+const { Cards, Users } = require('../models');
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const router = express.Router();
-
 
 // 칼럼 내 카드 조회
 router.get('/:columnId/card', async (req, res) => {
@@ -19,11 +18,24 @@ router.get('/:columnId/card', async (req, res) => {
       return res.status(401).json({ message: '해당 칼럼에 카드가 없습니다.' });
     }
 
-
     res.status(200).json({ datas: cards });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 조회 중 오류가 발생했습니다.' });
+  }
+});
+
+// 카드 상세조회
+router.get('/cards/:cardId', async (req, res) => {
+  const cardId = Number(req.params.cardId);
+  try {
+    const card = await Cards.findOne({
+      where: { cardId },
+      include: [{ model: Users }],
+    });
+    res.status(200).json({ data: card });
+  } catch (error) {
+    res.status(500).json({ message: error.message || '서버에서 예기치 못한 에러가 발생했습니다.' });
   }
 });
 
@@ -96,7 +108,7 @@ router.put('/card/:cardId', authMiddleware, async (req, res) => {
 
     const updatedCard = await Cards.findByPk(cardId);
 
-    res.status(200).json(updatedCard);
+    res.status(200).json({ data: updatedCard, ok: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 수정 중 오류가 발생했습니다.' });
@@ -113,7 +125,7 @@ router.delete('/card/:cardId', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: '해당 카드를 찾을 수 없습니다.' });
     }
 
-    res.status(204).json();
+    return res.status(204).json({ message: '카드삭제를 완료했습니다.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '카드 삭제 중 오류가 발생했습니다.' });
