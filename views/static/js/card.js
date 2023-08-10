@@ -10,7 +10,7 @@ const deleteBtnEl = document.querySelector('.delete-btn');
 const getData = async () => {
   const response = await fetch(`/api/cards/${cardId}`);
   const { data } = await response.json();
-  console.log(data);
+  // console.log(data);
   const userName = data.User.name;
   const { color, name, content, endDate: endDateData } = data;
   if (color === 'WHITE') {
@@ -40,7 +40,7 @@ deleteBtnEl.addEventListener('click', async () => {
       'Content-Type': 'application/json',
     },
   });
-  console.log(response);
+  // console.log(response);
   if (response.ok) {
     window.history.back();
   }
@@ -54,15 +54,17 @@ const commentEl = document.querySelector('.comment');
 
 const getCommentData = async () => {
   // 서버에서 댓글 목록을 가져와서 화면에 표시하는 함수
-  const response = await fetch('/api/comments'); // 댓글을 가져오는 API 엔드포인트
+  const response = await fetch(`/api/comments/${cardId}`); // 댓글을 가져오는 API 엔드포인트
   const { data } = await response.json();
-
+  console.log(data);
+  if (data.length === 0) return;
   // data 배열을 순회하며 댓글 정보를 화면에 표시하는 HTML 생성
   const temp = data.map((comment) => {
     return `
           <div class="comment" data-id=${comment.commentId}>
-            <p class="comment-author">${comment.author}</p>
-            <p class="comment-content">${comment.content}</p>
+            <p class="comment-comment">${comment.comment}</p>
+            <p class="comment-userName">작성자 : ${comment.userName}</p>
+            <p class="comment-date">작성일시 : ${comment.createdAt}</p>
             <button class="edit-comment-btn">수정</button>
             <button class="delete-comment-btn">삭제</button>
           </div>
@@ -105,10 +107,30 @@ commentEl.addEventListener('click', async function (e) {
     const data = await response.json();
     console.log(data);
 
-    if (data.message === '삭제가 완료되었습니다.') {
-      getData(); // 삭제 후 데이터를 다시 로드하여 화면 갱신
+    if (data.message === '댓글이 정상적으로 삭제되었습니다.') {
+      window.location.reload();
     } else {
       alert(data.message);
     }
+  }
+});
+
+// 댓글 생성
+const commentInputEl = document.querySelector('.comment-input');
+const commentCreateBtn = document.querySelector('.comment-create-btn');
+
+commentCreateBtn.addEventListener('click', async () => {
+  if (commentInputEl.value === '') return;
+  const response = await fetch(`/api/comments/${cardId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment: commentInputEl.value }),
+  });
+  const data = await response.json();
+  console.log(data);
+  if (data.message === '댓글이 작성되었습니다.') {
+    window.location.reload();
+  } else {
+    alert('에러가 발생했습니다. 다시 시도해주세요. 혹은 로그인해주세요.');
   }
 });
