@@ -11,38 +11,31 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/signup', (req, res) => {
-  const { authorization } = req.cookies;
-  if (authorization)  return res.render('auth', { login: 1 });
-  return res.redirect('/login');
- 
+  return res.render('auth');
 });
 
 router.get('/boards/:boardId', (req, res) => {
   const { authorization } = req.cookies;
-  if (authorization)   return res.render('board',{ login: 1 });
+  if (authorization) return res.render('board', { login: 1 });
   return res.redirect('/login');
- 
 });
 
 router.get('/cards/:cardId', (req, res) => {
   const { authorization } = req.cookies;
-  if (authorization)   return res.render('card',{ login: 1 });
+  if (authorization) return res.render('card', { login: 1 });
   return res.redirect('/login');
- 
 });
 
 router.get('/boards-admin', (req, res) => {
   const { authorization } = req.cookies;
-  if (authorization)   return res.render('board-admin',{ login: 1 });
+  if (authorization) return res.render('board-admin', { login: 1 });
   return res.redirect('/login');
- 
 });
 
 router.get('/boards-edit/:boardId', (req, res) => {
   const { authorization } = req.cookies;
-  if (authorization)   return res.render('board-edit',{ login: 1 });
+  if (authorization) return res.render('board-edit', { login: 1 });
   return res.redirect('/login');
- 
 });
 
 router.get('/user', (req, res) => {

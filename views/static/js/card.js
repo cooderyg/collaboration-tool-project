@@ -23,7 +23,7 @@ const getData = async () => {
   console.log(endDateData);
   cardName.innerText = name;
   cardContent.innerText = content;
-  endDate.innerText = endDateData;
+  endDate.innerText = `작성일 : ${new Date(endDateData).toLocaleDateString()}`;
   cardUser.innerText = `작성자 : ${userName}`;
 };
 getData();
@@ -64,7 +64,7 @@ const getCommentData = async () => {
           <div class="comment" data-id=${comment.commentId}>
             <p class="comment-comment">${comment.comment}</p>
             <p class="comment-userName">작성자 : ${comment.userName}</p>
-            <p class="comment-date">작성일시 : ${comment.createdAt}</p>
+            <p class="comment-date">작성일시 : ${new Date(comment.createdAt).toLocaleString()}</p>
             <button class="edit-comment-btn">수정</button>
             <button class="delete-comment-btn">삭제</button>
           </div>
