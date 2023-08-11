@@ -1,3 +1,21 @@
-body{
-    padding-top: 120px;
+body {
+  padding-top: 120px;
+}
+.card {
+  padding: 20px;
+  margin: 0 20px;
+}
+.comment-form {
+  padding: 10px;
+  border: 1px solid #3d3d3d;
+  margin: 20px;
+}
+.comment-container {
+  border: 1px solid #3d3d3d;
+  padding: 20px;
+  margin: 0 20px;
+}
+
+.comment li {
+  margin-top: 10px;
 }

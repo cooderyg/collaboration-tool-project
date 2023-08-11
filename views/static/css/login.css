@@ -1,0 +1,21 @@
+.login-box {
+  border: 1px solid #3d3d3d;
+  margin: 0 auto;
+  margin-top: 100px;
+  padding: 30px 20px;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.login-box > div {
+  display: flex;
+  flex-direction: column;
+}
+.login-box > a {
+  margin-top: 10px;
+}
+.login-box > div > p:nth-child(3),
+.login-box > div > button {
+  margin-top: 20px;
+}
