@@ -61,13 +61,13 @@ const getCommentData = async () => {
   // data 배열을 순회하며 댓글 정보를 화면에 표시하는 HTML 생성
   const temp = data.map((comment) => {
     return `
-          <div class="comment" data-id=${comment.commentId}>
+          <li class="comment-container" data-id=${comment.commentId}>
             <p class="comment-comment">${comment.comment}</p>
             <p class="comment-userName">작성자 : ${comment.userName}</p>
             <p class="comment-date">작성일시 : ${new Date(comment.createdAt).toLocaleString()}</p>
             <button class="edit-comment-btn">수정</button>
             <button class="delete-comment-btn">삭제</button>
-          </div>
+          </li>
         `;
   });
 

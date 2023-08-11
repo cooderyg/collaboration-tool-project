@@ -8,25 +8,21 @@
     width: 100%;
     background-color: #fff;
     border-bottom: 1px solid #ccc;
-
   }
 
   header .wrap {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding:10px 20px;
+    padding: 10px 20px;
   }
 
-
   .login {
-   
     font-weight: bold;
     text-decoration: none;
   }
 
   .mypagebtn {
-   
     font-weight: bold;
     text-decoration: none;
   }
@@ -34,30 +30,29 @@
 
 <header>
   <div class="wrap">
-    <h1><a href="/">협업도구앱</a></h1>
+    <h1><a href="/">1석2조</a></h1>
     <div style="display: flex">
       <% if(login==1) { %>
-        <a href="/boards-admin">보드 관리</a>
-        <a class="mypagebtn" style="margin-right: 20px" href="/user"> 내 정보 </a>
-        <a class="logout">로그아웃</a>
-        <% } else { %>
-          <a class="login" href="/login">로그인</a>
-          <% } %>
+      <a style="margin-right: 20px" href="/boards-admin">보드 관리</a>
+      <a class="mypagebtn" style="margin-right: 20px" href="/user"> 내 정보 </a>
+      <a class="logout">로그아웃</a>
+      <% } else { %>
+      <a class="login" href="/login">로그인</a>
+      <% } %>
     </div>
   </div>
 </header>
 <script>
   const path = window.location.pathname;
-  const logoutEl = document.querySelector('.logout')
-  if(logoutEl){
-    logoutEl.addEventListener('click', async() =>{
-      const response = await fetch('/api/logout',{
-        method:"POST"
-      })
-      const data = await response.json()
-      console.log(data)
-      if(data.message === '로그아웃 완료') window.location.reload()
-  })
+  const logoutEl = document.querySelector('.logout');
+  if (logoutEl) {
+    logoutEl.addEventListener('click', async () => {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.message === '로그아웃 완료') window.location.reload();
+    });
   }
-  
 </script>
