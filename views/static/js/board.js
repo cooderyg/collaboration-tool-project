@@ -55,22 +55,34 @@ const columnView = async () => {
   const columns = await getColumns();
   // HTML상의 컬럼리스트document에 접근
   const columnList = document.getElementById('column-list');
-
+  console.log('columnList = ', columns)
   columns.forEach(async (el) => {
     const column = document.createElement('div');
     column.innerHTML = `<div id="${el.columnId}" class="column">
                           <div>
                             <div class="column-title">
-                              <h2>${el.name}</h2>
+                              <div>
+                                <h2>${el.name}</h2>
+                              </div>
+                              <span>${el.order}</span>번
+                              <span>ID: ${el.columnId}</span>
+                              <i onclick="openColMenu(${el.columnId})" id="col-menu-btn" class="fa-solid fa-ellipsis col-menu-btn"></i>
                             </div>
-                            <span>${el.order}</span>번
-                            <span>ID: ${el.columnId}</span>
-                            <input id="new-name" type="text">
-                            <button id="edit-name-btn" onclick="editName()" class="edit-name">이름수정</button>
-                            <input id="new-order" type="text">
-                            <button id="edit-order-btn" onclick="editOrder()" class="edit-order">순서수정</button>
-                            <button onclick="removeColumn()">삭제하기</button>
-                            <button onclick="openModal()">카드추가</button>
+                            <div id="column-menu-${el.columnId}" class="menu-box">
+                              <div>
+                                <input id="new-name" type="text">
+                                <button id="edit-name-btn" onclick="editName()" class="edit-name">컬럼이름수정</button>
+                              </div>
+                              <div>
+                                <input id="new-order" type="text">
+                                <button id="edit-order-btn" onclick="editOrder()" class="edit-order">컬럼순서수정</button>
+                              </div>
+                              <div>
+                              </div>
+                              <button onclick="openModal()">카드추가</button>
+                              <button onclick="removeColumn()">삭제하기</button>
+                              <button onclick="closeColMenu(${el.columnId})">닫기</button>
+                            </div>
                           </div>
                         </div>`;
     columnList.append(column);
@@ -79,6 +91,77 @@ const columnView = async () => {
   cardView();
   // 컬럼 이름변경
 };
+
+// 컬럼 이름 변경
+async function editName($event) {
+  const parentElement = event.target.parentElement;
+  const newName = parentElement.childNodes[1].value;
+  const columnId = event.target.parentElement.parentElement.parentElement.parentElement.id;
+  console.log('columnId  = ', columnId)
+  await fetch(`/api/${boardId}/column/${columnId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: newName,
+    }),
+  })
+  .then((response) => response.json())
+  .then((result) => {
+    alert(result.message);
+  });
+  location.reload();
+}
+
+// 컬럼 순번 변경
+async function editOrder($event) {
+  const parentElement = event.target.parentElement;
+  const newOrder = parentElement.childNodes[1].value;
+  const columnId = event.target.parentElement.parentElement.parentElement.parentElement.id;
+  console.log('newOrder = ', newOrder)
+  await fetch(`/api/${boardId}/column_order/${columnId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      order: newOrder,
+    }),
+  })
+  .then((response) => response.json())
+  .then((result) => {
+    console.log('result = ', result);
+    alert(result.message);
+  });
+  location.reload();
+}
+
+// 컬럼 삭제하기
+async function removeColumn($event) {
+  const columnId = event.target.parentElement.parentElement.id;
+  await fetch(`/api/${boardId}/column/${columnId}`, {
+    method: 'DELETE',
+  })
+  .then((response) => response.json())
+  .then((result) => {
+    alert(result.message);
+  });
+  location.reload();
+}
+
+
+// 컬럼 메뉴열기
+function openColMenu(columnId) {
+  document.getElementById(`column-menu-${columnId}`).style.display = "flex"  
+}
+
+// 컬럼 메뉴 닫기
+function closeColMenu(columnId) {
+  document.getElementById(`column-menu-${columnId}`).style.display = "none"
+}
+
+
 
 // 카드데이터 가져오기
 const getCards = async (columnId) => {
@@ -111,7 +194,7 @@ const cardView = async () => {
         card.innerHTML = `<div  class="card" style="background-color:${el2.color}">
                             <div class="head-box">
                               <h3 class="card-title" onclick="location.href='/cards/${el2.cardId}'">${el2.name}</h3>
-                              <div id="card-menu" onclick="showMenu(${el2.cardId})" class="card-menu">카드메뉴</div>
+                              <i id="card-menu" onclick="showMenu(${el2.cardId})" class="fa-solid fa-plus card-menu"></i>
                               <div id="menu-${el2.cardId}" class="menu">
                                 <div class="input-box">
                                   <span>이동할 컬럼id: </span><input id="${el2.cardId}-column-id"/> 
@@ -136,6 +219,11 @@ const cardView = async () => {
     }
   });
 };
+
+
+
+
+
 
 // 카드 순서변경
 async function cardOrder(paramCardId, paramColumnId, $event) {
@@ -179,73 +267,20 @@ async function cardOrder(paramCardId, paramColumnId, $event) {
   
   location.reload();
 }
+
+// 카드의 메뉴열기
 function showMenu(param) {
   document.getElementById(`menu-${param}`).style.display = "block"  
 }
 
+// 카드의 메뉴 닫기
 function closeMenu(param) {
   document.getElementById(`menu-${param}`).style.display = "none"
 }
 
 
 
-// 컬럼 이름 변경
-async function editName($event) {
-  const parentElement = event.target.parentElement;
-  const newName = parentElement.childNodes[3].value;
-  const columnId = event.target.parentElement.parentElement.id;
-  
-  await fetch(`/api/${boardId}/column/${columnId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      name: newName,
-    }),
-  })
-  .then((response) => response.json())
-  .then((result) => {
-    alert(result.message);
-  });
-  location.reload();
-}
 
-// 컬럼 순번 변경
-async function editOrder($event) {
-  const parentElement = event.target.parentElement;
-  const newOrder = parentElement.childNodes[7].value;
-  const columnId = event.target.parentElement.parentElement.id;
-  
-  await fetch(`/api/${boardId}/column_order/${columnId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      order: newOrder,
-    }),
-  })
-  .then((response) => response.json())
-  .then((result) => {
-    console.log('result = ', result);
-    alert(result.message);
-  });
-  location.reload();
-}
-
-// 컬럼 삭제하기
-async function removeColumn($event) {
-  const columnId = event.target.parentElement.parentElement.id;
-  await fetch(`/api/${boardId}/column/${columnId}`, {
-    method: 'DELETE',
-  })
-  .then((response) => response.json())
-  .then((result) => {
-    alert(result.message);
-  });
-  location.reload();
-}
 
 const closeBtn = document.getElementById('close-modal');
 const modal = document.getElementById('modal');
@@ -253,13 +288,13 @@ const modal = document.getElementById('modal');
 // 날짜 셀렉트박스의 기본값으로 현재 날짜 넣기
 document.getElementById('card-end-date').value = new Date().toISOString().substring(0, 10);
 
-// 모달창 열기
+// 모달창 닫기
 closeBtn.addEventListener('click', closeModal);
 
 let columnId;
 // 모달창 열기
 async function openModal() {
-  columnId = event.target.parentElement.parentElement.id;
+  columnId = event.target.parentElement.parentElement.parentElement.id;
   console.log(' columnId = ', columnId);
   modal.style.display = 'block';
 }
