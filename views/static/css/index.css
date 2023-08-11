@@ -1,3 +1,6 @@
+body {
+  padding-top: 120px;
+}
 .board-from {
   margin: 30px auto;
   width: 500px;
